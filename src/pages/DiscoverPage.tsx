@@ -1,18 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMatching } from '../hooks/useMatching';
-import { auth } from '../services/firebase';
+import { auth, database } from '../services/firebase';
+import { ref, get, set, update } from 'firebase/database';
 import { Heart, X, UserCircle2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DiscoverPage = () => {
   const { matches, loading, error } = useMatching(auth.currentUser?.uid || '');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [dailyLimitReached, setDailyLimitReached] = useState(false); 
 
-  const handleLike = () => {
+  const checkAndUpdateDailyLimit = async () => {
+    if (!auth.currentUser) return;
+
+    const userId = auth.currentUser.uid;
+    const userRef = ref(database, `users/${userId}`);
+    const snapshot = await get(userRef);
+
+    const today = new Date().toISOString().split('T')[0]; 
+    const userData = snapshot.val();
+
+    if (userData && userData.lastViewedDate === today && userData.profilesViewedToday >= 10) {
+      setDailyLimitReached(true);
+    } else {
+      const profilesViewedToday = userData?.lastViewedDate === today ? userData.profilesViewedToday : 0;
+      await update(userRef, {
+        profilesViewedToday: profilesViewedToday,
+        // lastViewedDate: today,
+      });
+      setDailyLimitReached(false);
+    }
+  };
+
+  const incrementProfileViewCount = async () => {
+    if (!auth.currentUser) return;
+
+    const userId = auth.currentUser.uid;
+    const userRef = ref(database, `users/${userId}`);
+
+    await update(userRef, {
+      profilesViewedToday: Math.min((await get(userRef)).val()?.profilesViewedToday + 1, 10),
+    });
+  };
+
+  useEffect(() => {
+    checkAndUpdateDailyLimit();
+  }, []);
+
+  const handleLike = async () => {
+    if (dailyLimitReached) return;
+
+    await incrementProfileViewCount();
     setCurrentIndex(prev => Math.min(prev + 1, matches.length));
   };
 
-  const handleDislike = () => {
+  const handleDislike = async () => {
+    if (dailyLimitReached) return;
+
+    await incrementProfileViewCount();
     setCurrentIndex(prev => Math.min(prev + 1, matches.length));
   };
 
@@ -30,7 +75,7 @@ const DiscoverPage = () => {
   if (error) {
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-2xl mx-auto"
@@ -72,8 +117,8 @@ const DiscoverPage = () => {
           </p>
         </motion.div>
 
-        {matches.length === 0 || currentIndex >= matches.length ? (
-          <motion.div 
+        {dailyLimitReached || (matches.length === 0 || currentIndex >= matches.length) ? (
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-lg shadow-lg p-8 text-center"
@@ -108,7 +153,7 @@ const DiscoverPage = () => {
                     <p className="text-gray-500">Active recently</p>
                   </div>
                   <div className="bg-pink-100 px-3 py-1 rounded-full">
-                    <span className="text-pink-600 text-sm font-medium">50-60% Match</span>
+                    <span className="text-pink-600 text-sm font-medium">50-80% Match</span>
                   </div>
                 </div>
 

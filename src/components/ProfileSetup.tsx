@@ -37,8 +37,30 @@ const ProfileSetup = () => {
     }
   });
 
+  const isStepValid = (currentStep: number): boolean => {
+    switch (currentStep) {
+      case 1:
+        return profileData.username.trim() !== '' && profileData.age >= 18;
+      case 2:
+        return profileData.gender.trim() !== '' && profileData.genderSeeking.trim() !== '';
+      case 3:
+        return profileData.bio.length >= 300 && profileData.bio.length <= 500;
+      case 4:
+        return (
+          profileData.answers.hobby.trim() !== '' &&
+          profileData.answers.music.trim() !== '' &&
+          profileData.answers.travel.trim() !== '' &&
+          profileData.answers.food.trim() !== ''
+        );
+      default:
+        return false;
+    }
+  };
+
   const handleNextStep = () => {
-    setStep(step + 1);
+    if (isStepValid(step)) {
+      setStep(step + 1);
+    }
   };
 
   const handleSubmit = async () => {
@@ -59,8 +81,8 @@ const ProfileSetup = () => {
 
   const containerVariants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: { duration: 0.6 }
     },
@@ -72,7 +94,7 @@ const ProfileSetup = () => {
   };
 
   const renderStep = () => {
-    switch(step) {
+    switch (step) {
       case 1:
         return (
           <motion.div
@@ -94,7 +116,7 @@ const ProfileSetup = () => {
                     <input
                       type="text"
                       value={profileData.username}
-                      onChange={(e) => setProfileData({...profileData, username: e.target.value})}
+                      onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
                       className="pl-10 block h-10 w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500 bg-white/50 backdrop-blur-sm"
                       placeholder="Your unique username"
                       required
@@ -109,7 +131,7 @@ const ProfileSetup = () => {
                       min="18"
                       max="100"
                       value={profileData.age}
-                      onChange={(e) => setProfileData({...profileData, age: parseInt(e.target.value)})}
+                      onChange={(e) => setProfileData({ ...profileData, age: parseInt(e.target.value) })}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
                     />
                     <div className="mt-2 text-center text-lg font-semibold text-pink-500">
@@ -121,7 +143,7 @@ const ProfileSetup = () => {
             </div>
           </motion.div>
         );
-      
+
       case 2:
         return (
           <motion.div
@@ -140,12 +162,11 @@ const ProfileSetup = () => {
                       key={option}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setProfileData({...profileData, gender: option})}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        profileData.gender === option
-                          ? 'border-pink-500 bg-pink-50 text-pink-700'
-                          : 'border-gray-200 hover:border-pink-200'
-                      }`}
+                      onClick={() => setProfileData({ ...profileData, gender: option })}
+                      className={`p-4 rounded-lg border-2 transition-all ${profileData.gender === option
+                        ? 'border-pink-500 bg-pink-50 text-pink-700'
+                        : 'border-gray-200 hover:border-pink-200'
+                        }`}
                     >
                       {option.charAt(0).toUpperCase() + option.slice(1)}
                     </motion.button>
@@ -161,12 +182,11 @@ const ProfileSetup = () => {
                       key={option}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setProfileData({...profileData, genderSeeking: option})}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        profileData.genderSeeking === option
-                          ? 'border-pink-500 bg-pink-50 text-pink-700'
-                          : 'border-gray-200 hover:border-pink-200'
-                      }`}
+                      onClick={() => setProfileData({ ...profileData, genderSeeking: option })}
+                      className={`p-4 rounded-lg border-2 transition-all ${profileData.genderSeeking === option
+                        ? 'border-pink-500 bg-pink-50 text-pink-700'
+                        : 'border-gray-200 hover:border-pink-200'
+                        }`}
                     >
                       {option.charAt(0).toUpperCase() + option.slice(1)}
                     </motion.button>
@@ -176,7 +196,7 @@ const ProfileSetup = () => {
             </div>
           </motion.div>
         );
-      
+
       case 3:
         return (
           <motion.div
@@ -187,13 +207,21 @@ const ProfileSetup = () => {
             className="space-y-6"
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tell us about yourself</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tell us about yourself
+              </label>
               <div className="relative">
                 <textarea
                   value={profileData.bio}
-                  onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                  onChange={(e) => {
+                    const bio = e.target.value;
+                    if (bio.length <= 500) {
+                      setProfileData({ ...profileData, bio });
+                    }
+                  }}
                   rows={6}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500 bg-white/50 backdrop-blur-sm"
+                  className={`block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500 bg-white/50 backdrop-blur-sm ${profileData.bio.length < 300 || profileData.bio.length > 500 ? 'border-red-500' : ''
+                    }`}
                   placeholder="Share your story, interests, and what makes you unique..."
                   required
                 />
@@ -201,10 +229,15 @@ const ProfileSetup = () => {
                   {profileData.bio.length}/500
                 </div>
               </div>
+              {profileData.bio.length < 300 && (
+                <p className="text-red-500 text-sm mt-1">
+                  Bio must be at least 300 characters.
+                </p>
+              )}
             </div>
           </motion.div>
         );
-      
+
       case 4:
         return (
           <motion.div
@@ -230,7 +263,7 @@ const ProfileSetup = () => {
                     ...profileData,
                     answers: { ...profileData.answers, hobby: e.target.value }
                   })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                  className="block w-full rounded-lg border-gray-500 shadow-sm focus:ring-pink-500 focus:border-pink-500"
                   required
                 />
               </motion.div>
@@ -250,7 +283,7 @@ const ProfileSetup = () => {
                     ...profileData,
                     answers: { ...profileData.answers, music: e.target.value }
                   })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                  className="block w-full rounded-lg border-gray-500 shadow-sm focus:ring-pink-500 focus:border-pink-500"
                   required
                 />
               </motion.div>
@@ -270,7 +303,7 @@ const ProfileSetup = () => {
                     ...profileData,
                     answers: { ...profileData.answers, travel: e.target.value }
                   })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                  className="block w-full rounded-lg border-gray-500 shadow-sm focus:ring-pink-500 focus:border-pink-500"
                   required
                 />
               </motion.div>
@@ -290,14 +323,14 @@ const ProfileSetup = () => {
                     ...profileData,
                     answers: { ...profileData.answers, food: e.target.value }
                   })}
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                  className="block w-full rounded-lg border-gray-500 shadow-sm focus:ring-pink-500 focus:border-pink-500"
                   required
                 />
               </motion.div>
             </div>
           </motion.div>
         );
-      
+
       default:
         return null;
     }
@@ -314,7 +347,7 @@ const ProfileSetup = () => {
       </div>
 
       <div className="max-w-2xl mx-auto relative">
-        <motion.div 
+        <motion.div
           className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg p-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -335,9 +368,8 @@ const ProfileSetup = () => {
               {[1, 2, 3, 4].map((stepNumber) => (
                 <motion.div
                   key={stepNumber}
-                  className={`w-3 h-3 rounded-full ${
-                    step === stepNumber ? 'bg-pink-500' : 'bg-gray-300'
-                  }`}
+                  className={`w-3 h-3 rounded-full ${step === stepNumber ? 'bg-pink-500' : 'bg-gray-300'
+                    }`}
                   animate={{
                     scale: step === stepNumber ? [1, 1.2, 1] : 1,
                   }}
@@ -370,6 +402,7 @@ const ProfileSetup = () => {
             {renderStep()}
 
             <div className="flex justify-between pt-6">
+              {/* Back Button */}
               {step > 1 && (
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -380,12 +413,18 @@ const ProfileSetup = () => {
                   Back
                 </motion.button>
               )}
-              
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => step < 4 ? handleNextStep() : handleSubmit()}
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-md hover:shadow-lg ml-auto"
+                onClick={() => (step < 4 ? handleNextStep() : handleSubmit())}
+                disabled={!isStepValid(step)}
+                className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full ${!isStepValid(step)
+                    ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                    : step < 4
+                      ? 'text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600'
+                      : 'text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                  } transition-all duration-300 shadow-md hover:shadow-lg ml-auto`}
               >
                 {step < 4 ? (
                   <>

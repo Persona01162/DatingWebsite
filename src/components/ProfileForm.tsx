@@ -88,7 +88,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userId, onComplete }) => {
                   ...formData,
                   answers: { ...formData.answers, hobby: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-500 shadow-sm focus:border-pink-500 focus:ring-pink-500"
                 required
               />
             </div>
@@ -102,7 +102,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userId, onComplete }) => {
                   ...formData,
                   answers: { ...formData.answers, music: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-500 shadow-sm focus:border-pink-500 focus:ring-pink-500"
                 required
               />
             </div>
@@ -116,7 +116,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userId, onComplete }) => {
                   ...formData,
                   answers: { ...formData.answers, travel: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-500 shadow-sm focus:border-pink-500 focus:ring-pink-500"
                 required
               />
             </div>
@@ -130,7 +130,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ userId, onComplete }) => {
                   ...formData,
                   answers: { ...formData.answers, food: e.target.value }
                 })}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                className="mt-1 block w-full rounded-md border-gray-500 shadow-sm focus:border-pink-500 focus:ring-pink-500"
                 required
               />
             </div>

@@ -80,8 +80,8 @@ export class MatchingAlgorithm {
             (ageCompatibility * 0.2)
           ) * 100;
 
-          // Check if compatibility is between 50-60%
-          if (compatibility >= 50 && compatibility <= 60) {
+          // Check if compatibility is between 50-80%
+          if (compatibility >= 50 && compatibility <= 80) {
             matches.push({
               user: potentialMatch,
               compatibility

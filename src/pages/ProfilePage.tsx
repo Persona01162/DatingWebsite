@@ -93,13 +93,13 @@ const ProfilePage = () => {
           {/* Profile Header */}
           <div className="relative h-48 bg-gradient-to-r from-pink-500 to-purple-500">
             <div className="absolute inset-0 bg-black/20"></div>
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-all duration-300"
             >
               <Camera className="h-6 w-6" />
-            </motion.button>
+            </motion.button> */}
           </div>
 
           {/* Profile Picture */}

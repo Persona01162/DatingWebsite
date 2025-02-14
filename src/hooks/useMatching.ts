@@ -4,6 +4,8 @@ import { auth, database } from '../services/firebase';
 import { ref, get } from 'firebase/database';
 
 interface UserProfile {
+  username: ReactNode;
+  age: ReactNode;
   id: string;
   bio: string;
   gender: 'male' | 'female' | 'other';
