@@ -37,18 +37,19 @@ const DiscoverPage = () => {
         >
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <div className="mb-4 text-red-500">
-              <X className="h-12 w-12 mx-auto" />
+              {/* <X className="h-12 w-12 mx-auto" /> */}
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Oops! Something went wrong</h3>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <motion.button 
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">We've sent a verification link to email. Please check your inbox and click the link to verify your email address.
+            </h3>
+            {/* <p className="text-gray-600 mb-6">{error}</p> */}
+            {/* <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => window.location.reload()}
               className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-full hover:from-pink-600 hover:to-purple-600 transition-all duration-300 shadow-md hover:shadow-lg"
             >
               Try Again
-            </motion.button>
+            </motion.button> */}
           </div>
         </motion.div>
       </div>

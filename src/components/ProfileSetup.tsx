@@ -95,7 +95,7 @@ const ProfileSetup = () => {
                       type="text"
                       value={profileData.username}
                       onChange={(e) => setProfileData({...profileData, username: e.target.value})}
-                      className="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500 bg-white/50 backdrop-blur-sm"
+                      className="pl-10 block h-10 w-full rounded-lg border-gray-300 shadow-sm focus:ring-pink-500 focus:border-pink-500 bg-white/50 backdrop-blur-sm"
                       placeholder="Your unique username"
                       required
                     />

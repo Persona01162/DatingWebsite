@@ -14,6 +14,7 @@ const AuthForm = () => {
   const [loading, setLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
   const [verificationChecking, setVerificationChecking] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,28 +22,49 @@ const AuthForm = () => {
     setVerificationSent(false);
     setVerificationChecking(false);
     setError('');
+    setAcceptedTerms(false);
   }, [isLogin]);
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account', // Forces the account selection popup
+    });
     setLoading(true);
     setError('');
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider); // Use popup for sign-in
       const user = result.user;
 
+      // Check if the user already exists in the database
       const userRef = ref(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
 
       if (!snapshot.exists()) {
+        // New user: Show Terms and Conditions checkbox
+        const userAcceptedTerms = window.confirm(
+          'Do you accept the Terms and Conditions?'
+        );
+
+        if (!userAcceptedTerms) {
+          setError('You must accept the Terms and Conditions to continue.');
+          setLoading(false);
+          return;
+        }
+
+        // Create user profile in the database
         await set(ref(database, `users/${user.uid}`), {
           email: user.email,
-          username: '', 
+          username: '',
           profileShownToday: 0,
           swipesToday: 0,
+          termsAccepted: true,
+          termsAcceptedAt: new Date().toISOString(),
         });
-        navigate('/setup-profile'); 
+
+        navigate('/setup-profile');
       } else {
+        // Existing user: No Terms and Conditions checkbox
         const userData = snapshot.val();
         if (!userData.username || userData.username.trim() === '') {
           navigate('/setup-profile');
@@ -54,6 +76,8 @@ const AuthForm = () => {
       let errorMessage = 'An error occurred. Please try again.';
       if (error.code === 'auth/popup-closed-by-user') {
         errorMessage = 'Google Sign-In popup was closed.';
+      } else if (error.code === 'auth/redirect-uri-mismatch') {
+        errorMessage = 'Redirect URI mismatch. Please check your Firebase settings.';
       }
       setError(errorMessage);
     } finally {
@@ -90,6 +114,8 @@ const AuthForm = () => {
               username: '',
               profileShownToday: 0,
               swipesToday: 0,
+              termsAccepted: true,
+              termsAcceptedAt: new Date().toISOString()
             });
             navigate('/setup-profile');
           }
@@ -139,6 +165,12 @@ const AuthForm = () => {
           navigate('/setup-profile');
         }
       } else {
+        if (!acceptedTerms) {
+          setError('Please accept the Terms and Conditions to continue.');
+          setLoading(false);
+          return;
+        }
+
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await sendEmailVerification(userCredential.user);
         setVerificationSent(true);
@@ -175,6 +207,10 @@ const AuthForm = () => {
   const inputVariants = {
     focus: { scale: 1.02, transition: { duration: 0.2 } },
     blur: { scale: 1, transition: { duration: 0.2 } }
+  };
+
+  const openTerms = () => {
+    window.open('/terms.txt', '_blank');
   };
 
   if (verificationSent) {
@@ -307,11 +343,38 @@ const AuthForm = () => {
             </motion.div>
           </div>
 
+          {!isLogin && (
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="terms" className="font-medium text-gray-700">
+                  I accept the{' '}
+                  <button
+                    type="button"
+                    onClick={openTerms}
+                    className="text-pink-600 hover:text-pink-500 font-semibold"
+                  >
+                    Terms and Conditions
+                  </button>
+                </label>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button (Sign In / Sign Up) */}
           <div>
             <motion.button
               type="submit"
-              disabled={loading}
+              disabled={loading || (!isLogin && !acceptedTerms)}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all duration-200"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -342,7 +405,7 @@ const AuthForm = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+              <span className="absolute left-20 inset-y-0 flex items-center pl-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 48 48"
@@ -373,7 +436,7 @@ const AuthForm = () => {
           </div>
 
           {/* Toggle Between Login and Signup */}
-          <div>
+          <div className="flex items-center justify-center">
             <motion.button
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-pink-600 hover:text-pink-500"
@@ -384,17 +447,6 @@ const AuthForm = () => {
             </motion.button>
           </div>
         </form>
-
-        <div className="text-center mt-4">
-          <motion.button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-pink-600 hover:text-pink-500"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-          </motion.button>
-        </div>
       </motion.div>
     </div>
   );
