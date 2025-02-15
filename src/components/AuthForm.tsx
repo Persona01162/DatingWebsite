@@ -28,20 +28,18 @@ const AuthForm = () => {
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({
-      prompt: 'select_account', // Forces the account selection popup
+      prompt: 'select_account', 
     });
     setLoading(true);
     setError('');
     try {
-      const result = await signInWithPopup(auth, provider); // Use popup for sign-in
+      const result = await signInWithPopup(auth, provider); 
       const user = result.user;
 
-      // Check if the user already exists in the database
       const userRef = ref(database, `users/${user.uid}`);
       const snapshot = await get(userRef);
 
       if (!snapshot.exists()) {
-        // New user: Show Terms and Conditions checkbox
         const userAcceptedTerms = window.confirm(
           'Do you accept the Terms and Conditions?'
         );
@@ -52,7 +50,6 @@ const AuthForm = () => {
           return;
         }
 
-        // Create user profile in the database
         await set(ref(database, `users/${user.uid}`), {
           email: user.email,
           username: '',
@@ -64,7 +61,6 @@ const AuthForm = () => {
 
         navigate('/setup-profile');
       } else {
-        // Existing user: No Terms and Conditions checkbox
         const userData = snapshot.val();
         if (!userData.username || userData.username.trim() === '') {
           navigate('/setup-profile');
@@ -405,7 +401,7 @@ const AuthForm = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <span className="absolute left-20 inset-y-0 flex items-center pl-3">
+              <span className="absolute left-5 inset-y-0 flex items-center pl-3">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 48 48"

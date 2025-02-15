@@ -26,7 +26,7 @@ const DiscoverPage = () => {
       const profilesViewedToday = userData?.lastViewedDate === today ? userData.profilesViewedToday : 0;
       await update(userRef, {
         profilesViewedToday: profilesViewedToday,
-        // lastViewedDate: today,
+        lastViewedDate: today,
       });
       setDailyLimitReached(false);
     }
