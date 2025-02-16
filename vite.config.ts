@@ -14,4 +14,7 @@ export default defineConfig({
     'import.meta.env.MESSAGING_SENDER_ID': JSON.stringify(process.env.MESSAGING_SENDER_ID),
     'import.meta.env.APP_ID': JSON.stringify(process.env.APP_ID),
   },
+  server: {
+    historyApiFallback: true
+  }
 });

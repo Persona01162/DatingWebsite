@@ -25,9 +25,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={!user ? <LandingPage /> : <Navigate to="/app/discover" />} />
-        <Route path="/auth" element={!user ? <AuthForm /> : <Navigate to="/app/discover" />} />
-        <Route path="/setup-profile" element={user ? <ProfileSetup /> : <Navigate to="/auth" />} />
+        <Route path="/" element={!user ? <LandingPage /> : <Navigate to="/app/discover" replace />} />
+        <Route path="/auth" element={!user ? <AuthForm /> : <Navigate to="/app/discover" replace />} />
+        <Route path="/setup-profile" element={user ? <ProfileSetup /> : <Navigate to="/auth" replace />} />
         <Route
           path="/app/*"
           element={
@@ -40,7 +40,7 @@ function App() {
                     <Route path="/messages" element={<MessagesPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
-                    <Route path="/" element={<Navigate to="/app/discover" replace />} />
+                    <Route path="*" element={<Navigate to="/app/discover" replace />} />
                   </Routes>
                 </div>
               </div>
@@ -49,6 +49,7 @@ function App() {
             )
           }
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
