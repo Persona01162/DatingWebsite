@@ -1,6 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Users, MessageCircle, Shield, ArrowRight, Sparkles, Star } from 'lucide-react';
+import { Heart, Users, Shield, ArrowRight, Sparkles, Facebook, Twitter, Instagram } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const LandingPage = () => {
@@ -33,7 +32,7 @@ const LandingPage = () => {
         <nav className="relative z-10 bg-white/80 backdrop-blur-md shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
-              <motion.div 
+              <motion.div
                 className="flex items-center"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -62,13 +61,13 @@ const LandingPage = () => {
         </nav>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 relative z-10">
-          <motion.div 
+          <motion.div
             className="text-center"
             initial="initial"
             animate="animate"
             variants={staggerChildren}
           >
-            <motion.div 
+            <motion.div
               className="flex justify-center mb-8"
               variants={fadeInUp}
             >
@@ -78,18 +77,18 @@ const LandingPage = () => {
               </div>
             </motion.div>
 
-            <motion.h1 
+            <motion.h1
               className="text-6xl font-extrabold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500"
               variants={fadeInUp}
             >
               Find Your Perfect Match
             </motion.h1>
 
-            <motion.p 
+            <motion.p
               className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed"
               variants={fadeInUp}
             >
-              Discover meaningful connections based on personality compatibility. 
+              Discover meaningful connections based on personality compatibility.
               Our intelligent matching algorithm ensures you meet people who truly resonate with you.
             </motion.p>
 
@@ -107,7 +106,7 @@ const LandingPage = () => {
       </div>
 
       {/* Features Section */}
-      <motion.div 
+      <motion.div
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32"
         initial="initial"
         whileInView="animate"
@@ -115,7 +114,7 @@ const LandingPage = () => {
         variants={staggerChildren}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-          <motion.div 
+          <motion.div
             className="text-center group"
             variants={fadeInUp}
           >
@@ -130,7 +129,7 @@ const LandingPage = () => {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="text-center group"
             variants={fadeInUp}
           >
@@ -145,7 +144,7 @@ const LandingPage = () => {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="text-center group"
             variants={fadeInUp}
           >
@@ -163,7 +162,7 @@ const LandingPage = () => {
       </motion.div>
 
       {/* CTA Section */}
-      <motion.div 
+      <motion.div
         className="relative py-32 overflow-hidden"
         initial="initial"
         whileInView="animate"
@@ -171,7 +170,7 @@ const LandingPage = () => {
         variants={staggerChildren}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <motion.div
             className="relative bg-gradient-to-br from-pink-500 to-purple-500 rounded-3xl px-8 py-16 md:px-16 overflow-hidden"
             variants={fadeInUp}
           >
@@ -203,6 +202,36 @@ const LandingPage = () => {
           <div className="flex justify-center items-center">
             <Heart className="h-6 w-6 text-pink-500" />
             <span className="ml-2 text-gray-400">© 2025 PersonaMatch. All rights reserved.</span>
+          </div>
+          {/* Social Media Handles */}
+          <div className="flex justify-end items-center space-x-4">
+            <a
+              href="https://www.facebook.com/yourpage"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-pink-500 transition-colors duration-300"
+              aria-label="Facebook"
+            >
+              <Facebook className="h-6 w-6" />
+            </a>
+            <a
+              href="https://twitter.com/yourhandle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-pink-500 transition-colors duration-300"
+              aria-label="Twitter"
+            >
+              <Twitter className="h-6 w-6" />
+            </a>
+            <a
+              href="https://www.instagram.com/yourhandle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-pink-500 transition-colors duration-300"
+              aria-label="Instagram"
+            >
+              <Instagram className="h-6 w-6" />
+            </a>
           </div>
         </div>
       </footer>

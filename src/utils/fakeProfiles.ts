@@ -4,8 +4,8 @@ import { ref, set, get } from 'firebase/database';
 interface FakeProfile {
   username: string;
   age: number;
-  gender: 'female';
-  genderSeeking: 'male';
+  gender: 'male' | 'female';
+  genderSeeking: 'male' | 'female';
   bio: string;
   answers: {
     hobby: string;
@@ -33,7 +33,19 @@ const indianFemaleNames = [
   'Mishka', 'Navya', 'Nisha', 'Prisha', 'Rhea', 'Saisha', 'Siya', 'Vanya'
 ];
 
-const hobbies = [
+const indianMaleNames = [
+  'Aarav', 'Vihaan', 'Arjun', 'Kabir', 'Dhruv', 'Ishaan', 'Aditya', 'Rohan',
+  'Vivaan', 'Shaurya', 'Reyansh', 'Krishna', 'Virat', 'Aryan', 'Dev', 'Rudra',
+  'Pranav', 'Atharv', 'Advait', 'Yash'
+];
+
+const maleHobbies = [
+  'Cricket', 'Playing guitar', 'Photography', 'Chess', 'Badminton',
+  'Coding', 'Mountain biking', 'Yoga', 'Reading', 'Football',
+  'Table tennis', 'Sketching', 'Martial arts', 'Basketball', 'Writing poetry'
+];
+
+const femaleHobbies = [
   'Classical dance', 'Yoga', 'Reading', 'Painting', 'Cooking', 'Photography',
   'Gardening', 'Writing poetry', 'Singing', 'Meditation', 'Fashion design',
   'Playing sitar', 'Kathak', 'Bharatanatyam', 'Sketching mehendi designs'
@@ -59,7 +71,20 @@ const indianCuisines = [
   'Rajasthani food', 'Maharashtrian dishes', 'Kerala cuisine'
 ];
 
-const bios = [
+const maleBios = [
+  'Tech enthusiast and cricket lover. Looking for someone who shares my passion for innovation and sports.',
+  'Aspiring entrepreneur with a love for Indian classical music. Seeking a partner who appreciates culture and ambition.',
+  'Fitness enthusiast and foodie. Love exploring new restaurants and staying active. Looking for someone to share adventures with.',
+  'Software engineer by profession, musician by passion. Looking for someone who appreciates both logic and creativity.',
+  'Adventure seeker and photography enthusiast. Love capturing moments and creating memories.',
+  'Proud of my Indian roots and excited about modern opportunities. Seeking someone with similar values.',
+  'Balancing corporate life with creative pursuits. Looking for someone who understands work-life harmony.',
+  'Spiritual and ambitious. Seeking a partner who values both personal growth and professional success.',
+  'Love traveling and experiencing different cultures. Looking for a companion to explore life with.',
+  'Passionate about fitness and mental wellness. Seeking someone who prioritizes health and personal development.'
+];
+
+const femaleBios = [
   'A free spirit with a love for Indian traditions and modern thinking. Looking for someone who appreciates both worlds.',
   'Passionate about art and culture, always exploring new ways to express creativity through traditional and contemporary forms.',
   'Adventure seeker with a deep connection to my roots. Love traveling and discovering hidden gems in our beautiful country.',
@@ -72,14 +97,17 @@ const bios = [
   'Music lover and trained classical singer. Hoping to find someone who appreciates the harmony of life.'
 ];
 
-function generateFakeProfile(): FakeProfile {
+function generateFakeProfile(gender: 'male' | 'female'): FakeProfile {
   const timestamp = new Date().toISOString();
+  const names = gender === 'male' ? indianMaleNames : indianFemaleNames;
+  const hobbies = gender === 'male' ? maleHobbies : femaleHobbies;
+  const bios = gender === 'male' ? maleBios : femaleBios;
   
   return {
-    username: indianFemaleNames[Math.floor(Math.random() * indianFemaleNames.length)],
+    username: names[Math.floor(Math.random() * names.length)],
     age: Math.floor(Math.random() * (35 - 21) + 21),
-    gender: 'female',
-    genderSeeking: 'male',
+    gender,
+    genderSeeking: gender === 'male' ? 'female' : 'male',
     bio: bios[Math.floor(Math.random() * bios.length)],
     answers: {
       hobby: hobbies[Math.floor(Math.random() * hobbies.length)],
@@ -101,92 +129,84 @@ function generateFakeProfile(): FakeProfile {
   };
 }
 
-export async function createFakeProfiles() {
+export async function createFakeProfiles(gender: 'male' | 'female', count: number = 10) {
   try {
-    // Check if fake profiles already exist
-    const existingProfilesRef = ref(database, 'fakeProfiles');
-    const existingSnapshot = await get(existingProfilesRef);
-    
-    if (existingSnapshot.exists()) {
-      return; // Profiles already exist, no need to create more
-    }
-
-    // Try to create a smaller set of profiles first
     const profiles: Record<string, FakeProfile> = {};
     const usedNames = new Set<string>();
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < count; i++) {
       let profile: FakeProfile;
       let attempts = 0;
       const maxAttempts = 5;
 
       do {
-        profile = generateFakeProfile();
+        profile = generateFakeProfile(gender);
         attempts++;
-        if (attempts >= maxAttempts) {
-          // If we can't find a unique name after several attempts, skip this profile
-          break;
-        }
+        if (attempts >= maxAttempts) break;
       } while (usedNames.has(profile.username));
 
       if (attempts < maxAttempts) {
         usedNames.add(profile.username);
-        const id = `fake_profile_${i}`;
+        const id = `fake_${gender}_${Date.now()}_${i}`;
         profiles[id] = profile;
       }
     }
 
     if (Object.keys(profiles).length > 0) {
-      await set(ref(database, 'fakeProfiles'), profiles);
-      console.log(`Successfully created ${Object.keys(profiles).length} fake profiles`);
-    } else {
-      console.warn('No fake profiles were created due to constraints');
+      const fakeProfilesRef = ref(database, 'fakeProfiles');
+      const existingSnapshot = await get(fakeProfilesRef);
+      const existingProfiles = existingSnapshot.exists() ? existingSnapshot.val() : {};
+
+      await set(fakeProfilesRef, {
+        ...existingProfiles,
+        ...profiles
+      });
+
+      return Object.entries(profiles).map(([id, profile]) => ({
+        id,
+        ...profile
+      }));
     }
+
+    return [];
   } catch (error) {
-    console.warn('Unable to create fake profiles:', error);
-    // Don't throw the error, just log it
+    console.error('Error creating fake profiles:', error);
+    return [];
   }
 }
 
-export async function getRandomFakeProfiles(count: number = 10): Promise<FakeProfile[]> {
+export async function getRandomFakeProfiles(count: number = 10, gender?: 'male' | 'female'): Promise<FakeProfile[]> {
   try {
     const fakeProfilesRef = ref(database, 'fakeProfiles');
     const snapshot = await get(fakeProfilesRef);
     
-    if (!snapshot.exists()) {
-      // Try to create profiles, but don't fail if we can't
-      await createFakeProfiles();
-      const newSnapshot = await get(fakeProfilesRef);
-      if (!newSnapshot.exists()) {
-        return []; // Return empty array if we can't create or get profiles
+    let profiles: FakeProfile[] = [];
+    if (!snapshot.exists() || Object.keys(snapshot.val()).length === 0) {
+      // Create new fake profiles if none exist or if we need specific gender profiles
+      profiles = await createFakeProfiles(gender || 'female', count);
+    } else {
+      // Use existing profiles
+      const allProfiles = snapshot.val();
+      profiles = Object.entries(allProfiles)
+        .filter(([_, profile]: [string, any]) => !gender || profile.gender === gender)
+        .map(([id, profile]: [string, any]) => ({
+          id,
+          ...profile
+        }));
+
+      // If we don't have enough profiles of the requested gender, create more
+      if (profiles.length < count && gender) {
+        const newProfiles = await createFakeProfiles(gender, count - profiles.length);
+        profiles = [...profiles, ...newProfiles];
       }
-      return getRandomProfilesFromData(newSnapshot.val(), count);
     }
 
-    return getRandomProfilesFromData(snapshot.val(), count);
+    // Shuffle and return requested number of profiles
+    return profiles
+      .sort(() => Math.random() - 0.5)
+      .slice(0, count);
   } catch (error) {
-    console.warn('Unable to get random profiles:', error);
-    return []; // Return empty array on error
+    console.error('Error getting random fake profiles:', error);
+    return [];
   }
-}
-
-function getRandomProfilesFromData(profiles: Record<string, FakeProfile>, count: number): FakeProfile[] {
-  const profileIds = Object.keys(profiles);
-  const selectedProfiles: FakeProfile[] = [];
-  const selectedIndexes = new Set<number>();
-
-  while (selectedProfiles.length < count && selectedIndexes.size < profileIds.length) {
-    const randomIndex = Math.floor(Math.random() * profileIds.length);
-    if (!selectedIndexes.has(randomIndex)) {
-      selectedIndexes.add(randomIndex);
-      const profileId = profileIds[randomIndex];
-      const profile = profiles[profileId];
-      selectedProfiles.push({
-        ...profile,
-        id: profileId
-      });
-    }
-  }
-
-  return selectedProfiles;
 }

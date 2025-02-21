@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { auth, database } from '../services/firebase';
 import { ref, get } from 'firebase/database';
-import { UserCircle2, Heart, Camera, Edit2, MapPin, Calendar } from 'lucide-react';
+import { UserCircle2, Heart, Edit2, MapPin, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -17,15 +18,15 @@ const ProfilePage = () => {
       try {
         const userRef = ref(database, `users/${auth.currentUser.uid}`);
         const snapshot = await get(userRef);
-        
+
         if (snapshot.exists()) {
           const profileData = snapshot.val();
-          
+
           if (!profileData.username) {
             navigate('/setup-profile');
             return;
           }
-          
+
           if (profileData.minioProfileUrl) {
             try {
               const minioResponse = await fetch(profileData.minioProfileUrl);
@@ -84,7 +85,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-2xl mx-auto"

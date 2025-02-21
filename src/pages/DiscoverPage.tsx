@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useMatching } from '../hooks/useMatching';
 import { auth, database } from '../services/firebase';
-import { ref, get, set, update } from 'firebase/database';
+import { ref, get, update } from 'firebase/database';
 import { Heart, X, UserCircle2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

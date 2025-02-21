@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { MatchingAlgorithm } from '../utils/matchingAlgorithm';
 import { auth, database } from '../services/firebase';
 import { ref, get } from 'firebase/database';
+import { MatchingAlgorithm } from '../utils/matchingAlgorithm';
 
 interface UserProfile {
-  username: ReactNode;
-  age: ReactNode;
   id: string;
   bio: string;
   gender: 'male' | 'female' | 'other';
   genderSeeking: 'male' | 'female' | 'other';
   answers: Record<string, string>;
+  username: string;
+  age: number;
 }
 
 export const useMatching = (currentUserId: string) => {
@@ -28,47 +28,33 @@ export const useMatching = (currentUserId: string) => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch all users from Firebase
+
+        // Get current user's profile
+        const userRef = ref(database, `users/${currentUserId}`);
+        const userSnapshot = await get(userRef);
+        if (!userSnapshot.exists()) {
+          throw new Error('User profile not found');
+        }
+        const currentUser = { id: currentUserId, ...userSnapshot.val() };
+
+        // Get all users
         const usersRef = ref(database, 'users');
-        const snapshot = await get(usersRef);
-        
-        if (!snapshot.exists()) {
-          setMatches([]);
-          setLoading(false);
-          return;
+        const usersSnapshot = await get(usersRef);
+        if (!usersSnapshot.exists()) {
+          throw new Error('No users found');
         }
 
-        const usersData = snapshot.val();
-        const profiles = Object.entries(usersData).map(([id, data]: [string, any]) => ({
-          id,
-          bio: data.bio || '',
-          gender: data.gender || 'other',
-          genderSeeking: data.genderSeeking || 'other',
-          answers: data.answers || {},
-          username: data.username || '',
-          age: data.age || 18
-        }));
+        // Convert users data to array and exclude current user
+        const allUsers = Object.entries(usersSnapshot.val())
+          .filter(([id]) => id !== currentUserId)
+          .map(([id, profile]: [string, any]) => ({
+            id,
+            ...profile
+          }));
 
-        const currentUser = profiles.find(p => p.id === currentUserId);
-        if (!currentUser) {
-          setError('Profile not found');
-          setLoading(false);
-          return;
-        }
-
-        const potentialMatches = profiles.filter(p => 
-          p.id !== currentUserId && 
-          p.gender === currentUser.genderSeeking &&
-          p.genderSeeking === currentUser.gender
-        );
-
-        const compatibleMatches = await MatchingAlgorithm.findMatches(
-          currentUser,
-          potentialMatches
-        );
-
-        setMatches(compatibleMatches);
+        // Find matches using the matching algorithm
+        const matchedProfiles = await MatchingAlgorithm.findMatches(currentUser, allUsers);
+        setMatches(matchedProfiles);
       } catch (err) {
         console.error('Error in useMatching:', err);
         setError('Failed to load matches. Please try again later.');

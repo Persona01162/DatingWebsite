@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, get, set, update, push } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
-import { createFakeProfiles } from '../utils/fakeProfiles';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAY8oXo05DRReVHjPhosWZ1jbXV13MZoQM",
@@ -16,17 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const database = getDatabase(app);
-
-// Initialize fake profiles after Firebase auth is ready
-auth.onAuthStateChanged((user) => {
-  if (!user) {
-    // Only try to create fake profiles if we're not authenticated
-    // This prevents permission errors for regular users
-    createFakeProfiles().catch(error => {
-      console.warn('Skipping fake profile creation:', error.message);
-    });
-  }
-});
 
 export const createUserProfile = async (userId: string, profileData: any) => {
   try {
